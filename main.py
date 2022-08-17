@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import json
+import time
 
 # 家賃3万以下、ワンルーム以外、安い順
 base_url = "https://suumo.jp/jj/chintai/ichiran/FR301FC001/{}&cb=0.0&ct=3.0&mb=0&mt=9999999&md=02&md=03&md=04&md=05&md=06&et=9999999&cn=9999999&co=1&shkr1=03&shkr2=03&shkr3=03&shkr4=03&sngz=&po1=12&page={}"
@@ -11,6 +12,7 @@ locate_and_areas = json.load(json_open)
 
 @retry(tries=3, delay=10, backoff=2)
 def get_html(url):
+    time.sleep(1) # アクセス過多対策
     r = requests.get(url)
     soup = BeautifulSoup(r.content, "html.parser")
     return soup
@@ -31,16 +33,14 @@ for locate_and_area in locate_and_areas:
 
         for item in items:
             base_data = {}
-
-            # collect base information    
+ 
             base_data["名称"] = item.find("div", {"class": "cassetteitem_content-title"}).getText().strip()
             # base_data["カテゴリー"] = item.find("div", {"class": "cassetteitem_content-label"}).getText().strip()
-            # base_data["アドレス"] = item.find("li", {"class": "cassetteitem_detail-col1"}).getText().strip()
+            base_data["アドレス"] = item.find("li", {"class": "cassetteitem_detail-col1"}).getText().strip()
             # base_data["アクセス"] = station.getText().strip()
             # base_data["築年数"] = item.find("li", {"class": "cassetteitem_detail-col3"}).findAll("div")[0].getText().strip()
             # base_data["構造"] = item.find("li", {"class": "cassetteitem_detail-col3"}).findAll("div")[1].getText().strip()
 
-            # process for each room
             tbodys = item.find("table", {"class": "cassetteitem_other"}).findAll("tbody")
 
             for tbody in tbodys:
@@ -61,6 +61,5 @@ for locate_and_area in locate_and_areas:
 
                 all_data.append(data)    
     
-# convert to dataframe
 df = pd.DataFrame(all_data)
 df.to_csv("japan_data.csv")
