@@ -63,4 +63,4 @@ for locate_and_area in locate_and_areas:
     
 # convert to dataframe
 df = pd.DataFrame(all_data)
-df.to_csv("tokyo_23words_raw_data.csv")
+df.to_csv("japan_data.csv")
