@@ -1,9 +1,9 @@
 ## env
 python 3.8.2
 
-## execute
-1. install required modules
-2. python3 main.py
+## 実行手順
+1. モジュールのインストール（`python3 main.py`を実行してみて、エラー出たモジュールを`pip install {module name}`すればOK）
+2. `python3 main.py`
 
 ## motivation
 suumoに掲載されている安い賃貸物件を、日本全国から一括で取得したい。

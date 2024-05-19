@@ -60,6 +60,21 @@ for locate_and_area in locate_and_areas:
                 data["URL"] = "https://suumo.jp" + tbody.findAll("td")[8].find("a").get("href")
 
                 all_data.append(data)    
-    
-df = pd.DataFrame(all_data)
-df.to_csv("japan_data.csv")
+
+# M1Macだとpandasがinstallできなかった
+# df = pd.DataFrame(all_data)
+# df.to_csv("japan_data.csv")
+
+with open('japan_data.csv', 'w', encoding='utf-8') as f:
+    f.write("名称,アドレス,階数,家賃,管理費,間取り,面積,URL\n")
+    for data in all_data:
+        f.write("{},{},{},{},{},{},{},{}\n".format(
+            data["名称"],
+            data["アドレス"],
+            data["階数"],
+            data["家賃"],
+            data["管理費"],
+            data["間取り"],
+            data["面積"],
+            data["URL"]
+        ))
