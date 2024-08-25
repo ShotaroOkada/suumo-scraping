@@ -4,8 +4,12 @@ from bs4 import BeautifulSoup
 import json
 import time
 
+max_page = 5
+count_per_page = 30
+
+all_room_data_list = []
 json_open = open('areas.json', 'r')
-locate_and_areas = json.load(json_open)
+area_label_and_params_list = json.load(json_open)
 
 # 安い順
 def search_url(
@@ -21,8 +25,8 @@ def search_url(
         include_3DK = False, # 3DKを含めるか
         include_3LDK = False, # 3LDKを含めるか
         is_only_1st_floor = True, # 1階の物件に限定するか
-        max_rent = 5.0, # 家賃の上限（万円）
-        min_room_size = 40, # 部屋の広さの下限（m^2）
+        max_rent = 3.5, # 家賃の上限（万円）
+        min_room_size = 35, # 部屋の広さの下限（m^2）
         page = 1,
     ):
     only_1st_floor = "&tc=0400105" if is_only_1st_floor else ""
@@ -44,14 +48,11 @@ def get_html(url):
     r = requests.get(url)
     soup = BeautifulSoup(r.content, "html.parser")
     return soup
- 
-all_room_data_list = []
-max_page = 3
 
-for locate_and_area in locate_and_areas:
+for label_and_params in area_label_and_params_list:
     for page in range(1, max_page+1):
-        area_params = locate_and_area['area_params']
-        area_label = locate_and_area['area_label']
+        area_params = label_and_params['area_params']
+        area_label = label_and_params['area_label']
         url = search_url(area_params, page)
 
         soup = get_html(url)
@@ -64,7 +65,7 @@ for locate_and_area in locate_and_areas:
         for item in building_cards:
             building_data = {}
  
-            building_data["名称"] = item.find("div", {"class": "cassetteitem_content-title"}).getText().strip()
+            # building_data["名称"] = item.find("div", {"class": "cassetteitem_content-title"}).getText().strip()
             # building_data["カテゴリー"] = item.find("div", {"class": "cassetteitem_content-label"}).getText().strip()
             building_data["アドレス"] = item.find("li", {"class": "cassetteitem_detail-col1"}).getText().strip()
             # building_data["アクセス"] = station.getText().strip()
@@ -75,23 +76,28 @@ for locate_and_area in locate_and_areas:
 
             for room_table_row in rooms_table:
                 room_data = building_data.copy()
-
                 td_list = room_table_row.findAll("td")
+
                 room_data["間取り画像URL"] = td_list[1].findAll("img")[0].get("rel")
-                room_data["階数"] = td_list[2].getText().strip()
 
-                room_data["家賃"] = td_list[3].findAll("li")[0].getText().strip()
-                room_data["管理費"] = td_list[3].findAll("li")[1].getText().strip()
-
-                # room_data["敷金"] = td_list[4].findAll("li")[0].getText().strip()
-                # room_data["礼金"] = td_list[4].findAll("li")[1].getText().strip()
-
-                room_data["間取り"] = td_list[5].findAll("li")[0].getText().strip()
-                room_data["面積"] = td_list[5].findAll("li")[1].getText().strip()
+                # スプシで画像を表示する用の列
+                room_data["=ARRAYFORMULA(IMAGE(B1:B))"] = ""
 
                 room_data["suumoリンク"] = "https://suumo.jp" + td_list[8].find("a").get("href")
+
+                room_data["家賃（万円）"] = td_list[3].findAll("li")[0].getText().strip().replace("万円", "")
+                room_data["管理費"] = td_list[3].findAll("li")[1].getText().strip()
+
+                # room_data["階数"] = td_list[2].getText().strip()
+                # room_data["敷金"] = td_list[4].findAll("li")[0].getText().strip()
+                # room_data["礼金"] = td_list[4].findAll("li")[1].getText().strip()
+                room_data["間取り"] = td_list[5].findAll("li")[0].getText().strip()
+                room_data["面積"] = td_list[5].findAll("li")[1].getText().strip()
                 
-                all_room_data_list.append(room_data)    
+                all_room_data_list.append(room_data)
+
+        if len(building_cards) < count_per_page:
+            break
 
 timestamp = time.strftime("%Y%m%d%H%M%S")
 with open(f"suumo_data_{timestamp}.csv", 'w', encoding='utf-8') as f:
