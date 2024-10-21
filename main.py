@@ -93,8 +93,10 @@ for label_and_params in area_label_and_params_list:
                 # room_data["礼金"] = td_list[4].findAll("li")[1].getText().strip()
                 room_data["間取り"] = td_list[5].findAll("li")[0].getText().strip()
                 room_data["面積"] = td_list[5].findAll("li")[1].getText().strip()
-                
-                all_room_data_list.append(room_data)
+
+                # 間取り画像URLに被りがなければ追加
+                if not any(d["間取り画像URL"] == room_data["間取り画像URL"] for d in all_room_data_list):
+                    all_room_data_list.append(room_data)
 
         if len(building_cards) < count_per_page:
             break
