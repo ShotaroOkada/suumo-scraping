@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import json
 import time
 
-max_page = 10
+max_page = 30
 count_per_page = 30
 
 all_room_data_list = []
@@ -16,10 +16,10 @@ def search_url(
         area_params, # 市区町村のパラメータ
         include_one_room = False, # ワンルームを含めるか
         include_1K = False, # 1Kを含めるか
-        include_1DK = True, # 1DKを含めるか
-        include_1LDK = True, # 1LDKを含めるか
-        include_2K = True, # 2Kを含めるか
-        include_2DK = True, # 2DKを含めるか
+        include_1DK = False, # 1DKを含めるか
+        include_1LDK = False, # 1LDKを含めるか
+        include_2K = False, # 2Kを含めるか
+        include_2DK = False, # 2DKを含めるか
         include_2LDK = True, # 2LDKを含めるか
         include_3K = False, # 3Kを含めるか
         include_3DK = False, # 3DKを含めるか
