@@ -10,6 +10,7 @@ count_per_page = 30
 all_room_data_list = []
 json_open = open('areas.json', 'r')
 area_label_and_params_list = json.load(json_open)
+ignore_area_labels = ["道央", "道東", "道南", "道北"]
 
 # 安い順
 def search_url(
@@ -51,8 +52,12 @@ def get_html(url):
 
 for label_and_params in area_label_and_params_list:
     for page in range(1, max_page+1):
-        area_params = label_and_params['area_params']
         area_label = label_and_params['area_label']
+
+        if area_label in ignore_area_labels:
+            continue
+
+        area_params = label_and_params['area_params']
         url = search_url(area_params, page)
 
         soup = get_html(url)
